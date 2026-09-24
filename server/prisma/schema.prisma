@@ -1,0 +1,102 @@
+// MongoDB Schema for בית ביחד (Bait Beyached)
+// A comprehensive, clean database structure for the organization's website
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+}
+
+// ============================================================
+// 1. Admin Users & Access Control
+// ============================================================
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+// ============================================================
+// 2. Contact Form Submissions
+// Stores all inquiries from the public contact form
+// ============================================================
+enum MessageStatus {
+  UNREAD     // חדש / לא נקרא
+  READ       // נקרא
+  HANDLED    // טופל
+  ARCHIVED   // בארכיון
+}
+
+model ContactMessage {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  firstName String
+  lastName  String
+  email     String
+  phone     String
+  message   String
+  status    MessageStatus @default(UNREAD)
+  notes     String?       // Internal admin notes
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("contact_messages")
+}
+
+// ============================================================
+// 3. Donations & Payment Processing
+// Supports multiple payment methods (credit card, bank transfer, standing orders)
+// ============================================================
+enum PaymentType {
+  CREDIT_CARD     // כרטיס אשראי
+  BANK_TRANSFER   // העברה בנקאית
+  STANDING_ORDER  // הוראת קבע חודשית
+  PHONE_PLEDGE    // תרומה טלפונית
+}
+
+enum PaymentStatus {
+  PENDING    // בהמתנה לסליקה
+  COMPLETED  // בוצע בהצלחה
+  FAILED     // נכשל
+}
+
+model Donation {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  amount        Int           // Amount in cents (ILS). e.g., 18000 = ₪180
+  paymentType   PaymentType   @default(CREDIT_CARD)
+  status        PaymentStatus @default(PENDING)
+  
+  // Donor information for receipt (tax regulations)
+  donorName     String?
+  donorEmail    String?
+  donorPhone    String?
+  
+  // Payment processor identification (Cardcom / Tranzila / Meshulam)
+  // SECURITY: Card details are NOT stored here - only the transaction ID
+  transactionId String?       @unique
+  receiptUrl    String?       // Link to generated receipt PDF
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("donations")
+}
+
+// No dynamic content models - site is purely informational
+// Testimonials and FAQ are hardcoded in the frontend (HomePage.tsx)

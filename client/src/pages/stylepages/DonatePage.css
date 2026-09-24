@@ -1,0 +1,278 @@
+:root {
+  --logo-text-color: #43124e;
+  --logo-bg-color: #e6dcbe;
+  --logo-bg-hover: #f4efe4;
+  --bg-pearl-dark: #f2ede4; /* גוון פנינה כהה ומעודן */
+  --gold-accent: #d4af37;   /* גוון זהב יוקרתי */
+}
+
+.donate-page-container {
+  min-height: 100vh;
+  background-color: var(--bg-pearl-dark);
+  direction: rtl;
+  display: flex;
+  flex-direction: column;
+}
+
+.donate-main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  flex-grow: 1;
+}
+
+/* הכרטיס המרכזי - בעיצוב תואם לכרטיסים בדף הבית */
+.donate-card-box {
+  background-color: #ffffff;
+  padding: 40px 35px;
+  border-radius: 20px;
+  border: 1.5px solid var(--gold-accent);
+  box-shadow: 0 10px 30px rgba(67, 18, 78, 0.12);
+  max-width: 520px;
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* כפתור חזרה לדף הבית */
+.back-to-home-btn {
+  background: none;
+  border: none;
+  color: var(--logo-text-color);
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease, transform 0.2s ease;
+  padding: 0;
+}
+
+.back-to-home-btn:hover {
+  color: var(--gold-accent);
+  transform: translateX(4px);
+}
+
+/* כותרת הדף בעיצוב היוקרתי */
+.donate-title {
+  font-size: 32px;
+  color: var(--logo-text-color);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 8px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.donate-subtitle {
+  text-align: center;
+  color: #555555;
+  font-size: 16px;
+  margin-bottom: 30px;
+  font-family: serif;
+}
+
+.amount-selection-form h3 {
+  font-size: 18px;
+  color: var(--logo-text-color);
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* גריד סכומי תרומה */
+.predefined-amounts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 25px;
+}
+
+.amount-btn {
+  padding: 14px 10px;
+  border: 1.5px solid rgba(212, 175, 55, 0.5);
+  border-radius: 12px;
+  background-color: rgba(230, 220, 190, 0.2);
+  color: var(--logo-text-color);
+  font-size: 18px;
+  font-weight: bold;
+  font-family: serif;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.amount-btn:hover {
+  border-color: var(--gold-accent);
+  background-color: var(--logo-bg-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(67, 18, 78, 0.08);
+}
+
+.amount-btn.selected {
+  border-color: var(--gold-accent);
+  background-color: var(--logo-text-color);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(67, 18, 78, 0.2);
+}
+
+/* שדה סכום חופשי */
+.custom-amount-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 25px;
+  text-align: right;
+}
+
+.custom-amount-wrapper label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--logo-text-color);
+}
+
+.custom-amount-wrapper input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #e2d4ea;
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.custom-amount-wrapper input:focus {
+  border-color: var(--gold-accent);
+}
+
+/* כפתורי פעולה מרכזיים */
+.confirm-amount-btn,
+.submit-payment-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--logo-text-color);
+  color: #ffffff;
+  border: 1.5px solid var(--gold-accent);
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  margin-top: 10px;
+}
+
+.confirm-amount-btn:hover,
+.submit-payment-btn:hover {
+  background-color: #5a1a68;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(67, 18, 78, 0.2);
+}
+
+.confirm-amount-btn:disabled {
+  background-color: #cccccc;
+  border-color: #bbbbbb;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* סיכום סכום שנבחר */
+.selected-amount-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(230, 220, 190, 0.3);
+  border: 1px solid var(--gold-accent);
+  padding: 12px 18px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  color: var(--logo-text-color);
+  font-size: 16px;
+}
+
+.selected-amount-summary strong {
+  font-size: 20px;
+  font-family: serif;
+}
+
+.change-amount-btn {
+  background: none;
+  border: none;
+  color: #c0392b;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.change-amount-btn:hover {
+  color: #e74c3c;
+}
+
+/* טופס אשראי */
+.credit-card-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+  text-align: right;
+}
+
+.credit-card-form label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--logo-text-color);
+}
+
+.credit-card-form input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #e2d4ea;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.credit-card-form input:focus {
+  border-color: var(--gold-accent);
+}
+
+.form-row-two {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row-two .form-group {
+  flex: 1;
+}
+
+.input-error {
+  border-color: #e53e3e !important;
+}
+
+.error-msg {
+  color: #e53e3e;
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+@media (max-width: 480px) {
+  .predefined-amounts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .form-row-two {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .donate-card-box {
+    padding: 30px 20px;
+  }
+}

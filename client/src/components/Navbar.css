@@ -1,0 +1,71 @@
+:root {
+  --logo-text-color: #43124e;
+  --logo-bg-color: #e6dcbe;
+  --logo-bg-hover: #f4efe4;
+  --navbar-pearl-bg: #fdfbf7; /* גוון פנינה */
+}
+
+/* =========================================
+   סרגל הניווט הראשי (Sticky Header / Fixed)
+   ========================================= */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: var(--logo-bg-color); /* צבע רקע של ה-Navbar */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* צל מפריד מתוכן הדף */
+  z-index: 1000; /* דואג שסרגל הניווט יופיע מעל כל אלמנט בדף */
+}
+
+/* =========================================
+   תפריט וכפתורי הניווט
+   ========================================= */
+.navbar-menu {
+  display: flex;
+  gap: 20px; /* רווח בין הכפתורים */
+  align-items: center;
+}
+
+.nav-button {
+  padding: 12px 24px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--logo-text-color);
+  background-color: var(--logo-bg-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-button:hover {
+  background-color: var(--logo-bg-hover);
+  transform: translateY(-2px);
+}
+
+.nav-button:active {
+  transform: translateY(0);
+}
+
+/* =========================================
+   כפתור תרומה
+   ========================================= */
+.donate-button {
+  background-color: var(--logo-text-color);
+  color: #ffffff;
+}
+
+.donate-button:hover {
+  background-color: #5c1b6b;
+}
+
+.nav-button:disabled {
+  opacity: 0.65;
+  cursor: default;
+  transform: none;
+}

@@ -8,6 +8,8 @@ import {
 } from "../controllers/contactController.js";
 import { validateRequest } from "../middleware/errorHandler.js";
 import { createContactMessageSchema } from "../utils/validation.js";
+import { authenticate, requireRole } from "../middleware/auth.js";
+import { publicSubmissionLimiter } from "../middleware/rateLimit.js";
 
 const router = Router();
 
@@ -16,11 +18,17 @@ const router = Router();
 // =====================================================
 
 // POST /api/contact - Submit contact form
-router.post("/", validateRequest(createContactMessageSchema), createContactMessage);
+router.post(
+  "/",
+  publicSubmissionLimiter,
+  validateRequest(createContactMessageSchema),
+  createContactMessage
+);
 
 // =====================================================
-// Admin Routes (should have auth middleware in production)
+// Admin Routes (require a valid staff login)
 // =====================================================
+router.use(authenticate, requireRole("ADMIN", "EDITOR"));
 
 // GET /api/contact - Get all contact messages
 router.get("/", getAllContactMessages);

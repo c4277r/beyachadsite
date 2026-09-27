@@ -1,6 +1,9 @@
 import React from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
+import { submitContactMessage, ApiRequestError } from '../lib/api';
 
+// Field rules mirror server/src/utils/validation.ts createContactMessageSchema
+// exactly, so a form the user believes is valid never gets rejected server-side.
 export interface IContactInput {
   firstName: string;
   lastName: string;
@@ -12,26 +15,29 @@ export interface IContactInput {
 interface ContactFormProps {
   onSubmitSuccess?: () => void;
   idPrefix?: string;
-  onSubmit?: SubmitHandler<IContactInput>;
 }
 
 export const ContactForm: React.FC<ContactFormProps> = ({
   onSubmitSuccess,
   idPrefix = 'form',
-  onSubmit: onSubmitProp,
 }) => {
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitSuccessful },
+    setError,
+    formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm<IContactInput>();
 
-  const onSubmit: SubmitHandler<IContactInput> = (data) => {
-    onSubmitProp?.(data);
-    reset();
-    if (onSubmitSuccess) {
-      onSubmitSuccess();
+  const onSubmit: SubmitHandler<IContactInput> = async (data) => {
+    try {
+      await submitContactMessage(data);
+      reset();
+      onSubmitSuccess?.();
+    } catch (error) {
+      const message =
+        error instanceof ApiRequestError ? error.message : 'שליחת ההודעה נכשלה, אנא נסה שוב';
+      setError('root', { message });
     }
   };
 
@@ -42,6 +48,9 @@ export const ContactForm: React.FC<ContactFormProps> = ({
           הודעתך נשלחה בהצלחה! נחזור אליך בהקדם.
         </div>
       )}
+      {errors.root && (
+        <div className="error-msg">{errors.root.message}</div>
+      )}
 
       <div className="form-group">
         <label htmlFor={`${idPrefix}-firstName`}>שם פרטי</label>
@@ -49,7 +58,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
           id={`${idPrefix}-firstName`}
           type="text"
           placeholder="שם פרטי"
-          {...register('firstName', { required: 'שדה חובה' })}
+          {...register('firstName', { required: 'שדה חובה', minLength: { value: 2, message: 'שם קצר מדי' } })}
           className={errors.firstName ? 'input-error' : ''}
         />
         {errors.firstName && (
@@ -63,7 +72,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
           id={`${idPrefix}-lastName`}
           type="text"
           placeholder="שם משפחה"
-          {...register('lastName', { required: 'שדה חובה' })}
+          {...register('lastName', { required: 'שדה חובה', minLength: { value: 2, message: 'שם קצר מדי' } })}
           className={errors.lastName ? 'input-error' : ''}
         />
         {errors.lastName && (
@@ -96,12 +105,13 @@ export const ContactForm: React.FC<ContactFormProps> = ({
         <input
           id={`${idPrefix}-phone`}
           type="tel"
-          placeholder="מספר טלפון"
+          placeholder="05XXXXXXXX"
           {...register('phone', {
             required: 'שדה חובה',
             pattern: {
-              value: /^0\d{8,9}$/,
-              message: 'מספר טלפון לא תקין',
+              // Must match server's `^05\d{8}$` (Israeli mobile format).
+              value: /^05\d{8}$/,
+              message: 'מספר טלפון לא תקין (דוגמה: 0501234567)',
             },
           })}
           className={errors.phone ? 'input-error' : ''}
@@ -117,7 +127,11 @@ export const ContactForm: React.FC<ContactFormProps> = ({
           id={`${idPrefix}-message`}
           rows={4}
           placeholder="כתוב את הודעתך כאן..."
-          {...register('message', { required: 'שדה חובה' })}
+          {...register('message', {
+            required: 'שדה חובה',
+            minLength: { value: 10, message: 'הודעה חייבת להכיל לפחות 10 תווים' },
+            maxLength: { value: 2000, message: 'הודעה ארוכה מדי' },
+          })}
           className={errors.message ? 'input-error' : ''}
         />
         {errors.message && (
@@ -125,8 +139,8 @@ export const ContactForm: React.FC<ContactFormProps> = ({
         )}
       </div>
 
-      <button type="submit" className="contact-submit-btn">
-        שלח הודעה
+      <button type="submit" className="contact-submit-btn" disabled={isSubmitting}>
+        {isSubmitting ? 'שולח...' : 'שלח הודעה'}
       </button>
     </form>
   );

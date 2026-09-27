@@ -79,7 +79,7 @@ export const getAllDonations = asyncHandler(async (req: Request, res: Response) 
 // Get Single Donation by ID
 // =====================================================
 export const getDonation = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   const donation = await prisma.donation.findUnique({
     where: { id },
@@ -112,7 +112,7 @@ export const getDonation = asyncHandler(async (req: Request, res: Response) => {
 // Update Donation Status & Transaction ID (Payment Processor Webhook)
 // =====================================================
 export const updateDonation = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { status, transactionId, receiptUrl } = req.body;
 
   if (!["PENDING", "COMPLETED", "FAILED"].includes(status)) {

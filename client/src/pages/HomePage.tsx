@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { type SubmitHandler } from 'react-hook-form';
 import Navbar from '../components/Navbar';
-import { ContactForm, type IContactInput } from './ContactForm';
+import { ContactForm } from './ContactForm';
 import logoImg from '../images/logo.png';
 import { DonateModal, type DonateModalType } from './DonateModel';
 import { FlipCard } from './FlipCard';
@@ -91,15 +90,6 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
     { id: 11, src: img11, alt: 'עמותה בפעילות' },
     { id: 12, src: img12, alt: 'עמותה בפעילות' },
   ];
-
-  const onSubmitModal: SubmitHandler<IContactInput> = (data) => {
-    void data;
-    setIsContactOpen(false);
-  };
-
-  const onSubmitBottom: SubmitHandler<IContactInput> = (data) => {
-    void data;
-  };
 
   const handleOpenContact = () => setIsContactOpen(true);
   const handleCloseContact = () => setIsContactOpen(false);
@@ -412,7 +402,7 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
           <p className="contact-subtitle">
             אנחנו כאן לכל פנייה, שרבוט או מחשבה. נשמח לחזור אליכם בהקדם!
           </p>
-          <ContactForm idPrefix="bottom" onSubmit={onSubmitBottom} />
+          <ContactForm idPrefix="bottom" />
         </div>
       </section>
 
@@ -428,7 +418,7 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
             <p className="contact-subtitle">
               אנחנו כאן לכל פנייה, שרבוט או מחשבה.
             </p>
-            <ContactForm idPrefix="modal" onSubmit={onSubmitModal} />
+            <ContactForm idPrefix="modal" onSubmitSuccess={handleCloseContact} />
           </div>
         </div>
       )}

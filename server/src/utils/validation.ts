@@ -16,11 +16,23 @@ export type CreateContactMessageInput = z.infer<typeof createContactMessageSchem
 // =====================================================
 // Donation Form Validation
 // =====================================================
+// Maximum sensible single-donation amount (in ILS). Prevents typos/abuse
+// (e.g. accidental extra zero) from creating unreasonable pending records.
+// Adjust if the organization needs to support larger single donations.
+export const MAX_DONATION_AMOUNT_ILS = 50_000;
+
 export const createDonationSchema = z.object({
-  amount: z.number().positive("סכום התרומה חייב להיות חיובי").min(1, "סכום מינימלי: ₪1"),
+  amount: z
+    .number()
+    .positive("סכום התרומה חייב להיות חיובי")
+    .min(1, "סכום מינימלי: ₪1")
+    .max(MAX_DONATION_AMOUNT_ILS, `סכום מקסימלי לתרומה בודדת: ₪${MAX_DONATION_AMOUNT_ILS}`),
   paymentType: z.enum(["CREDIT_CARD", "BANK_TRANSFER", "STANDING_ORDER", "PHONE_PLEDGE"]),
-  donorName: z.string().min(2, "שם התורם חובה").optional(),
-  donorEmail: z.string().email("כתובת אימייל לא תקינה").optional(),
+  // Required so every donation can be matched to a receipt and donor
+  // can be contacted about it. Never accept card number/expiry/CVV here -
+  // card data must only ever be entered on the payment processor's page.
+  donorName: z.string().min(2, "שם התורם חובה"),
+  donorEmail: z.string().email("כתובת אימייל לא תקינה"),
   donorPhone: z.string().regex(/^05\d{8}$/, "מספר טלפון לא תקין").optional(),
 });
 

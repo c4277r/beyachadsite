@@ -30,13 +30,22 @@ export const createContactMessage = asyncHandler(async (req: Request, res: Respo
 // =====================================================
 // Get All Contact Messages (Admin Only)
 // =====================================================
+const CONTACT_STATUSES = ["UNREAD", "READ", "HANDLED", "ARCHIVED"] as const;
+type ContactStatus = (typeof CONTACT_STATUSES)[number];
+
+function isContactStatus(value: unknown): value is ContactStatus {
+  return typeof value === "string" && (CONTACT_STATUSES as readonly string[]).includes(value);
+}
+
 export const getAllContactMessages = asyncHandler(async (req: Request, res: Response) => {
   const { status } = req.query;
 
-  const where = status ? { status: status as string } : {};
+  if (status !== undefined && !isContactStatus(status)) {
+    throw new ApiError(400, "סטטוס לא תקין");
+  }
 
   const messages = await prisma.contactMessage.findMany({
-    where,
+    where: status ? { status } : {},
     orderBy: { createdAt: "desc" },
   });
 
@@ -51,7 +60,7 @@ export const getAllContactMessages = asyncHandler(async (req: Request, res: Resp
 // Get Single Contact Message by ID
 // =====================================================
 export const getContactMessage = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   const message = await prisma.contactMessage.findUnique({
     where: { id },
@@ -71,10 +80,10 @@ export const getContactMessage = asyncHandler(async (req: Request, res: Response
 // Update Contact Message Status (Admin Only)
 // =====================================================
 export const updateContactMessage = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { status, notes } = req.body;
 
-  if (!["UNREAD", "READ", "HANDLED", "ARCHIVED"].includes(status)) {
+  if (!isContactStatus(status)) {
     throw new ApiError(400, "סטטוס לא תקין");
   }
 
@@ -97,7 +106,7 @@ export const updateContactMessage = asyncHandler(async (req: Request, res: Respo
 // Delete Contact Message (Admin Only)
 // =====================================================
 export const deleteContactMessage = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   await prisma.contactMessage.delete({
     where: { id },

@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import Navbar from '../components/Navbar';
+import { submitDonation, ApiRequestError } from '../lib/api';
 import './stylepages/DonatePage.css';
 
-interface IDonateCreditCardInput {
+// This page only collects donor details, never card data - card entry
+// happens on the payment processor's own hosted page (not implemented yet,
+// see server/src/services/kesherService.ts). Fields mirror
+// server/src/utils/validation.ts createDonationSchema exactly.
+interface IDonateDetailsInput {
   amount: number;
-  cardNumber: string;
-  cardExpiry: string;
-  cardCvv: string;
-  holderId: string;
+  donorName: string;
+  donorEmail: string;
+  donorPhone?: string;
 }
+
+// Keep in sync with MAX_DONATION_AMOUNT_ILS in server/src/utils/validation.ts
+const MAX_DONATION_AMOUNT_ILS = 50_000;
 
 interface DonatePageProps {
   onNavigateToHome?: () => void;
@@ -19,6 +26,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ onNavigateToHome }) => {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [isAmountConfirmed, setIsAmountConfirmed] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const predefinedAmounts = [180, 360, 720, 1250, 3600];
 
@@ -26,8 +34,8 @@ export const DonatePage: React.FC<DonatePageProps> = ({ onNavigateToHome }) => {
     register,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting },
-  } = useForm<IDonateCreditCardInput>();
+    formState: { errors, isSubmitting, isSubmitSuccessful },
+  } = useForm<IDonateDetailsInput>();
 
   const handleSelectAmount = (amount: number) => {
     setSelectedAmount(amount);
@@ -43,16 +51,30 @@ export const DonatePage: React.FC<DonatePageProps> = ({ onNavigateToHome }) => {
   };
 
   const finalAmount = selectedAmount ?? Number(customAmount);
+  const isAmountValid = finalAmount > 0 && finalAmount <= MAX_DONATION_AMOUNT_ILS;
 
   const handleConfirmAmount = (e: React.FormEvent) => {
     e.preventDefault();
-    if (finalAmount && finalAmount > 0) {
+    if (isAmountValid) {
       setIsAmountConfirmed(true);
     }
   };
 
-  const onSubmitPayment: SubmitHandler<IDonateCreditCardInput> = () => {
-    alert('התשלום דורש חיבור לספק סליקה מאובטח. לא בוצע חיוב.');
+  const onSubmitPayment: SubmitHandler<IDonateDetailsInput> = async (data) => {
+    setSubmitError(null);
+    try {
+      await submitDonation({
+        amount: finalAmount,
+        paymentType: 'CREDIT_CARD',
+        donorName: data.donorName,
+        donorEmail: data.donorEmail,
+        donorPhone: data.donorPhone || undefined,
+      });
+    } catch (error) {
+      setSubmitError(
+        error instanceof ApiRequestError ? error.message : 'שליחת התרומה נכשלה, אנא נסה שוב'
+      );
+    }
   };
 
   return (
@@ -96,17 +118,21 @@ export const DonatePage: React.FC<DonatePageProps> = ({ onNavigateToHome }) => {
                   value={customAmount}
                   onChange={handleCustomAmountChange}
                   min="1"
+                  max={MAX_DONATION_AMOUNT_ILS}
                 />
+                {customAmount !== '' && !isAmountValid && (
+                  <span className="error-msg">{`סכום חייב להיות בין ₪1 ל-₪${MAX_DONATION_AMOUNT_ILS}`}</span>
+                )}
               </div>
 
-              <button
-                type="submit"
-                className="confirm-amount-btn"
-                disabled={!finalAmount || finalAmount <= 0}
-              >
-                אישור סכום והמשך לתשלום
+              <button type="submit" className="confirm-amount-btn" disabled={!isAmountValid}>
+                אישור סכום והמשך
               </button>
             </form>
+          ) : isSubmitSuccessful ? (
+            <div className="success-message">
+              תרומתך בסך ₪{finalAmount} נקלטה בהצלחה! ניצור עמך קשר בהקדם להשלמת התשלום. תודה על התמיכה.
+            </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmitPayment)} className="credit-card-form" noValidate>
               <div className="selected-amount-summary">
@@ -121,86 +147,61 @@ export const DonatePage: React.FC<DonatePageProps> = ({ onNavigateToHome }) => {
                 </button>
               </div>
 
+              {submitError && <div className="error-msg">{submitError}</div>}
+
               <div className="form-group">
-                <label htmlFor="holderId">מספר תעודת זהות של בעל הכרטיס</label>
+                <label htmlFor="donorName">שם מלא</label>
                 <input
-                  id="holderId"
+                  id="donorName"
                   type="text"
-                  maxLength={9}
-                  placeholder="9 ספרות"
-                  {...register('holderId', {
+                  placeholder="שם מלא"
+                  {...register('donorName', {
                     required: 'שדה חובה',
-                    pattern: {
-                      value: /^\d{9}$/,
-                      message: 'תעודת זהות חייבת להכיל 9 ספרות',
-                    },
+                    minLength: { value: 2, message: 'שם קצר מדי' },
                   })}
-                  className={errors.holderId ? 'input-error' : ''}
+                  className={errors.donorName ? 'input-error' : ''}
                 />
-                {errors.holderId && <span className="error-msg">{errors.holderId.message}</span>}
+                {errors.donorName && <span className="error-msg">{errors.donorName.message}</span>}
               </div>
 
               <div className="form-group">
-                <label htmlFor="cardNumber">מספר כרטיס אשראי</label>
+                <label htmlFor="donorEmail">אימייל</label>
                 <input
-                  id="cardNumber"
-                  type="text"
-                  maxLength={16}
-                  placeholder="16 ספרות ללא רווחים"
-                  {...register('cardNumber', {
+                  id="donorEmail"
+                  type="email"
+                  placeholder="לצורך שליחת קבלה"
+                  {...register('donorEmail', {
                     required: 'שדה חובה',
                     pattern: {
-                      value: /^\d{16}$/,
-                      message: 'מספר כרטיס אשראי תקין מכיל 16 ספרות',
+                      value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                      message: 'כתובת אימייל לא תקינה',
                     },
                   })}
-                  className={errors.cardNumber ? 'input-error' : ''}
+                  className={errors.donorEmail ? 'input-error' : ''}
                 />
-                {errors.cardNumber && <span className="error-msg">{errors.cardNumber.message}</span>}
+                {errors.donorEmail && <span className="error-msg">{errors.donorEmail.message}</span>}
               </div>
 
-              <div className="form-row-two">
-                <div className="form-group">
-                  <label htmlFor="cardExpiry">תוקף (MM/YY)</label>
-                  <input
-                    id="cardExpiry"
-                    type="text"
-                    maxLength={5}
-                    placeholder="MM/YY"
-                    {...register('cardExpiry', {
-                      required: 'שדה חובה',
-                      pattern: {
-                        value: /^(0[1-9]|1[0-2])\/\d{2}$/,
-                        message: 'פורמט לא תקין (MM/YY)',
-                      },
-                    })}
-                    className={errors.cardExpiry ? 'input-error' : ''}
-                  />
-                  {errors.cardExpiry && <span className="error-msg">{errors.cardExpiry.message}</span>}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="cardCvv">3 ספרות בגב הכרטיס (CVV)</label>
-                  <input
-                    id="cardCvv"
-                    type="password"
-                    maxLength={3}
-                    placeholder="CVV"
-                    {...register('cardCvv', {
-                      required: 'שדה חובה',
-                      pattern: {
-                        value: /^\d{3}$/,
-                        message: 'חייב להכיל 3 ספרות',
-                      },
-                    })}
-                    className={errors.cardCvv ? 'input-error' : ''}
-                  />
-                  {errors.cardCvv && <span className="error-msg">{errors.cardCvv.message}</span>}
-                </div>
+              <div className="form-group">
+                <label htmlFor="donorPhone">מספר טלפון (לא חובה)</label>
+                <input
+                  id="donorPhone"
+                  type="tel"
+                  placeholder="05XXXXXXXX"
+                  {...register('donorPhone', {
+                    pattern: {
+                      // Must match server's `^05\d{8}$` (Israeli mobile format).
+                      value: /^05\d{8}$/,
+                      message: 'מספר טלפון לא תקין (דוגמה: 0501234567)',
+                    },
+                  })}
+                  className={errors.donorPhone ? 'input-error' : ''}
+                />
+                {errors.donorPhone && <span className="error-msg">{errors.donorPhone.message}</span>}
               </div>
 
               <button type="submit" className="submit-payment-btn" disabled={isSubmitting}>
-                ביצוע תשלום מאובטח
+                {isSubmitting ? 'שולח...' : 'אישור פרטים והמשך לתרומה'}
               </button>
             </form>
           )}

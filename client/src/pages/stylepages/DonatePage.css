@@ -262,6 +262,15 @@
   margin-top: 3px;
 }
 
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+}
+
 @media (max-width: 480px) {
   .predefined-amounts-grid {
     grid-template-columns: repeat(2, 1fr);

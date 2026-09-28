@@ -39,10 +39,10 @@ export const DonateModal: React.FC<DonateModalProps> = ({ type, onClose }) => {
             <div className="donate-modal-icon">🏦</div>
             <h2 className="contact-title">פרטים להעברה בנקאית</h2>
             <div className="bank-details-box">
-              <p><strong>שם החשבון:</strong> תמיד לצידכם ע"ר</p>
-              <p><strong>בנק:</strong> מזרחי טפחות</p>
-              <p><strong>סניף:</strong> 430</p>
-              <p><strong>מספר חשבון:</strong> 363197</p>
+              <p><strong>שם החשבון:</strong> חרוצים במעש ע"ר</p>
+              <p><strong>בנק:</strong> לאומי</p>
+              <p><strong>סניף:</strong> 856</p>
+              <p><strong>מספר חשבון:</strong> 322960014</p>
             </div>
             <p className="donate-modal-note">
               לאחר העברת התרומה, מומלץ ליצור עמנו קשר לקבלת קבלה מוכרת במס (סעיף 46).
@@ -58,10 +58,10 @@ export const DonateModal: React.FC<DonateModalProps> = ({ type, onClose }) => {
               להקמת הרשאה לחיוב חשבון ישירות בבנק שלכם:
             </p>
             <div className="bank-details-box">
-              <p><strong>שם החשבון:</strong> תמיד לצידכם ע"ר</p>
-              <p><strong>בנק:</strong> מזרחי טפחות (20)</p>
-              <p><strong>סניף:</strong> 430</p>
-              <p><strong>מספר חשבון:</strong> 363197</p>
+              <p><strong>שם החשבון:</strong> חרוצים במעש ע"ר</p>
+              <p><strong>בנק:</strong> לאומי</p>
+              <p><strong>סניף:</strong> 856</p>
+              <p><strong>מספר חשבון:</strong> 322960014</p>
             </div>
             <button className="contact-submit-btn" onClick={onClose}>
               אישור
@@ -76,8 +76,8 @@ export const DonateModal: React.FC<DonateModalProps> = ({ type, onClose }) => {
             <p className="contact-subtitle">
               ניתן לתרום במוקד הטלפוני המאובטח שלנו:
             </p>
-            <a href="tel:0538207000" className="phone-display-link">
-              053-8207000
+            <a href="tel:0534123911" className="phone-display-link">
+              053-4123911
             </a>
             <p className="donate-modal-note">זמינים עבורכם א'-ה' 09:00 - 18:00</p>
           </>

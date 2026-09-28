@@ -370,7 +370,7 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
                 </div>
                 <h3 className="donate-card-title-text">תרומה בשיחת טלפון</h3>
                 <div className="donate-card-text-details">
-                  בטלפון מס': <strong>0538207000</strong>
+                  בטלפון מס': <strong>0534123911</strong>
                 </div>
                 <button className="donate-card-action-btn" onClick={() => setActiveDonateModal('phone')}>
                   לתרומה &larr;
@@ -383,8 +383,8 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
                 </div>
                 <h3 className="donate-card-title-text">תרומה בהעברה בנקאית</h3>
                 <div className="donate-card-text-details">
-                  מזרחי טפחות סניף <strong>430</strong> | מספר חשבון <strong>363197</strong><br />
-                  ע"ש תמיד לצידכם ע"ר
+                  בנק לאומי, סניף <strong>856</strong> | מספר חשבון <strong>322960014</strong><br />
+                  ע"ש חרוצים במעש ע"ר
                 </div>
                 <button className="donate-card-action-btn" onClick={() => setActiveDonateModal('bank')}>
                   לתרומה &larr;

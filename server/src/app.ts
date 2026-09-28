@@ -17,10 +17,14 @@ const app = express();
 // "https://baitbeyached.org.il,https://www.baitbeyached.org.il"
 // Falls back to CLIENT_URL (single origin) for simple setups, and to the
 // local Vite dev server so local development keeps working out of the box.
-const allowedOrigins = (
-  process.env.ALLOWED_ORIGINS?.split(",").map((o) => o.trim()).filter(Boolean) ??
-  [process.env.CLIENT_URL, "http://localhost:5173"].filter(Boolean)
-) as string[];
+const configuredOrigins = process.env.ALLOWED_ORIGINS
+  ?.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins =
+  configuredOrigins?.length
+    ? configuredOrigins
+    : [process.env.CLIENT_URL, "http://localhost:5173"].filter(Boolean) as string[];
 
 app.use(
   cors({

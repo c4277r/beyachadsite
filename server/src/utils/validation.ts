@@ -38,6 +38,14 @@ export const createDonationSchema = z.object({
 
 export type CreateDonationInput = z.infer<typeof createDonationSchema>;
 
+export const updateDonationSchema = z.object({
+  status: z.enum(["PENDING", "COMPLETED", "FAILED"]),
+  transactionId: z.string().max(200).optional(),
+  receiptUrl: z.string().url().max(2048).optional(),
+}).strict();
+
+export type UpdateDonationInput = z.infer<typeof updateDonationSchema>;
+
 // =====================================================
 // User (Admin) Validation
 // =====================================================

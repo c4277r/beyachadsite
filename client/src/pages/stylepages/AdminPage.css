@@ -1,0 +1,236 @@
+.admin-shell {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 48px max(24px, calc((100vw - 1040px) / 2));
+  color: #20352e;
+  background: #f3f5f1;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.admin-shell h1,
+.admin-shell h2,
+.admin-shell p {
+  margin-top: 0;
+}
+
+.admin-header,
+.admin-entry-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.admin-header {
+  margin-bottom: 34px;
+  border-bottom: 1px solid #c9d2ca;
+  padding-bottom: 24px;
+}
+
+.admin-header h1,
+.admin-login h1 {
+  margin-bottom: 0;
+  font-size: 30px;
+}
+
+.admin-eyebrow {
+  margin-bottom: 8px;
+  color: #547565;
+  font: 700 13px/1.4 Arial, sans-serif;
+}
+
+.admin-login {
+  width: min(100%, 430px);
+  margin: 10vh auto;
+  padding: 32px;
+  border: 1px solid #c9d2ca;
+  border-top: 4px solid #46725c;
+  background: #fff;
+}
+
+.admin-login form {
+  display: grid;
+  gap: 10px;
+  margin-top: 28px;
+  font-family: Arial, sans-serif;
+}
+
+.admin-login label,
+.admin-status-label span {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-login input,
+.admin-status-label select {
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #aab8ad;
+  border-radius: 3px;
+  background: white;
+  color: #20352e;
+  font: inherit;
+}
+
+.admin-login form button,
+.admin-logout {
+  min-height: 42px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 3px;
+  background: #315c49;
+  color: white;
+  cursor: pointer;
+  font: 700 14px Arial, sans-serif;
+}
+
+.admin-login form button {
+  margin-top: 10px;
+}
+
+.admin-login form button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid #c9d2ca;
+}
+
+.admin-tabs button {
+  min-height: 42px;
+  padding: 8px 18px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #40574b;
+  cursor: pointer;
+  font: 700 15px Arial, sans-serif;
+}
+
+.admin-tabs button[aria-pressed='true'] {
+  border-bottom-color: #315c49;
+  color: #20352e;
+}
+
+.admin-logout {
+  background: transparent;
+  border: 1px solid #8da093;
+  color: #315c49;
+}
+
+.admin-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-entry {
+  padding: 20px;
+  border: 1px solid #d5ddd6;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.admin-entry h2 {
+  margin-bottom: 5px;
+  font-size: 19px;
+}
+
+.admin-entry-heading > div > p,
+.admin-contact-links {
+  margin-bottom: 0;
+  color: #5b6c61;
+  font: 14px/1.5 Arial, sans-serif;
+}
+
+.admin-status-label {
+  display: grid;
+  gap: 4px;
+  font-family: Arial, sans-serif;
+}
+
+.admin-status-label select {
+  min-width: 118px;
+  min-height: 36px;
+}
+
+.admin-contact-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 14px;
+}
+
+.admin-contact-links a {
+  color: #315c49;
+  overflow-wrap: anywhere;
+}
+
+.admin-message-body {
+  margin: 16px 0 0;
+  white-space: pre-wrap;
+  line-height: 1.7;
+}
+
+.admin-donation-status {
+  padding: 6px 10px;
+  border-radius: 3px;
+  background: #edf1ed;
+  font: 700 13px Arial, sans-serif;
+}
+
+.status-completed {
+  background: #e3f1e7;
+  color: #23633b;
+}
+
+.status-failed {
+  background: #f8e7e4;
+  color: #8c2f24;
+}
+
+.admin-error {
+  color: #9e3226;
+  font: 14px/1.5 Arial, sans-serif;
+}
+
+.admin-state {
+  padding: 28px 0;
+  color: #5b6c61;
+  font: 15px/1.6 Arial, sans-serif;
+}
+
+.admin-shell button:focus-visible,
+.admin-shell select:focus-visible,
+.admin-shell input:focus-visible,
+.admin-shell a:focus-visible {
+  outline: 3px solid #a85e34;
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .admin-shell {
+    padding: 28px 16px;
+  }
+
+  .admin-header {
+    align-items: flex-start;
+  }
+
+  .admin-header h1,
+  .admin-login h1 {
+    font-size: 25px;
+  }
+
+  .admin-entry {
+    padding: 16px;
+  }
+
+  .admin-entry-heading {
+    align-items: flex-start;
+  }
+}

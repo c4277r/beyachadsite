@@ -7,7 +7,7 @@ import {
   getDonationStats,
 } from "../controllers/donationController.js";
 import { validateRequest } from "../middleware/errorHandler.js";
-import { createDonationSchema } from "../utils/validation.js";
+import { createDonationSchema, updateDonationSchema } from "../utils/validation.js";
 import { authenticate, requireRole } from "../middleware/auth.js";
 import { publicSubmissionLimiter } from "../middleware/rateLimit.js";
 
@@ -47,7 +47,7 @@ router.get("/stats/overview", getDonationStats);
 // GET /api/donations/:id - Get single donation
 router.get("/:id", getDonation);
 
-// PATCH /api/donations/:id - Update donation (payment status, transaction ID)
-router.patch("/:id", updateDonation);
+// Until provider webhooks are implemented, only admins may update payment status.
+router.patch("/:id", requireRole("ADMIN"), validateRequest(updateDonationSchema), updateDonation);
 
 export default router;

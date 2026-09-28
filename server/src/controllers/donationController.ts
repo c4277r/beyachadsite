@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
-import { CreateDonationInput } from "../utils/validation.js";
+import { CreateDonationInput, UpdateDonationInput } from "../utils/validation.js";
 import { ApiError, asyncHandler } from "../middleware/errorHandler.js";
 
 // =====================================================
@@ -113,11 +113,7 @@ export const getDonation = asyncHandler(async (req: Request, res: Response) => {
 // =====================================================
 export const updateDonation = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const { status, transactionId, receiptUrl } = req.body;
-
-  if (!["PENDING", "COMPLETED", "FAILED"].includes(status)) {
-    throw new ApiError(400, "סטטוס לא תקין");
-  }
+  const { status, transactionId, receiptUrl }: UpdateDonationInput = req.body;
 
   const donation = await prisma.donation.update({
     where: { id },

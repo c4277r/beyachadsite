@@ -95,3 +95,70 @@ export interface DonationSubmission {
 export function submitDonation(input: DonationSubmission) {
   return postJson<{ id: string; amount: number; status: string }>('/donations', input);
 }
+
+export interface AdminContactMessage extends ContactSubmission {
+  id: string;
+  status: 'UNREAD' | 'READ' | 'HANDLED' | 'ARCHIVED';
+  createdAt: string;
+}
+
+export interface AdminDonation {
+  id: string;
+  amount: number;
+  paymentType: PaymentType;
+  status: 'PENDING' | 'COMPLETED' | 'FAILED';
+  donorName: string | null;
+  donorEmail: string | null;
+  createdAt: string;
+}
+
+async function adminRequest<T>(path: string, token: string, init: RequestInit = {}): Promise<T> {
+  let response: Response;
+  try {
+    const headers = new Headers(init.headers);
+    headers.set('Authorization', `Bearer ${token}`);
+    if (init.body) headers.set('Content-Type', 'application/json');
+    response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
+  } catch {
+    throw new ApiRequestError('לא ניתן להתחבר לשרת, בדוק את החיבור לאינטרנט ונסה שוב', 0);
+  }
+
+  const payload = (await response.json().catch(() => null)) as
+    | ApiSuccessResponse<T>
+    | ApiErrorResponse
+    | null;
+  if (!response.ok || !payload || payload.success === false) {
+    throw new ApiRequestError(
+      payload?.message ?? 'אירעה שגיאה, אנא נסה שוב',
+      response.status,
+      payload && payload.success === false ? payload.details : undefined
+    );
+  }
+  return payload.data;
+}
+
+export function loginAdmin(email: string, password: string) {
+  return postJson<{ token: string; user: { id: string; email: string; name: string; role: string } }>(
+    '/auth/login',
+    { email, password }
+  );
+}
+
+export function getAdminContactMessages(token: string) {
+  return adminRequest<AdminContactMessage[]>('/contact', token);
+}
+
+export function updateAdminContactMessage(
+  token: string,
+  id: string,
+  input: { status: AdminContactMessage['status'] }
+) {
+  return adminRequest<AdminContactMessage>(`/contact/${encodeURIComponent(id)}`, token, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+}
+
+export function getAdminDonations(token: string) {
+  return adminRequest<AdminDonation[]>('/donations', token);
+}

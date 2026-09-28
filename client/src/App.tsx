@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import Home from './pages/HomePage';
 import DonatePage from './pages/DonatePage';
+import AdminPage from './pages/AdminPage';
+
+type Page = 'home' | 'donate' | 'admin';
 
 const App: React.FC = () => {
-  const getPageFromLocation = (): 'home' | 'donate' =>
-    window.location.hash === '#donate' ? 'donate' : 'home';
-  const [currentPage, setCurrentPage] = useState<'home' | 'donate'>(getPageFromLocation);
+  const getPageFromLocation = (): Page => {
+    if (window.location.hash === '#donate') return 'donate';
+    if (window.location.hash === '#admin') return 'admin';
+    return 'home';
+  };
+  const [currentPage, setCurrentPage] = useState<Page>(getPageFromLocation);
 
   useEffect(() => {
     const handlePopState = () => setCurrentPage(getPageFromLocation());
@@ -28,14 +34,15 @@ const App: React.FC = () => {
   };
 
   return (
-    <main>
+    <>
       {currentPage === 'home' && (
         <Home onNavigateToDonate={navigateToDonate} />
       )}
       {currentPage === 'donate' && (
         <DonatePage onNavigateToHome={navigateToHome} />
       )}
-    </main>
+      {currentPage === 'admin' && <AdminPage />}
+    </>
   );
 };
 

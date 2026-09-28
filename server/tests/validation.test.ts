@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   createDonationSchema,
+  updateDonationSchema,
   createContactMessageSchema,
   MAX_DONATION_AMOUNT_ILS,
 } from "../src/utils/validation.js";
@@ -85,6 +86,21 @@ describe("createDonationSchema", () => {
     if (result.success) {
       expect(result.data).not.toHaveProperty("status");
     }
+  });
+});
+
+describe("updateDonationSchema", () => {
+  it("accepts a valid admin status update", () => {
+    expect(updateDonationSchema.safeParse({ status: "COMPLETED" }).success).toBe(true);
+  });
+
+  it("rejects invalid status values and unknown fields", () => {
+    expect(updateDonationSchema.safeParse({ status: "REFUNDED" }).success).toBe(false);
+    expect(updateDonationSchema.safeParse({ status: "COMPLETED", amount: 10 }).success).toBe(false);
+  });
+
+  it("rejects malformed receipt URLs", () => {
+    expect(updateDonationSchema.safeParse({ status: "COMPLETED", receiptUrl: "not-a-url" }).success).toBe(false);
   });
 });
 

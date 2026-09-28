@@ -36,6 +36,8 @@ vi.mock("../src/lib/prisma.js", () => ({
 
 beforeAll(() => {
   process.env.JWT_SECRET = "test-only-secret-do-not-use-in-production";
+  process.env.CLIENT_URL = "http://localhost:5173";
+  process.env.ALLOWED_ORIGINS = "";
 });
 
 describe("Public donation submissions", () => {
@@ -110,6 +112,15 @@ describe("Public contact submissions", () => {
   });
 });
 
+describe("CORS configuration", () => {
+  it("falls back to CLIENT_URL when ALLOWED_ORIGINS is blank", async () => {
+    const { default: app } = await import("../src/app.js");
+    const res = await request(app).get("/health").set("Origin", "http://localhost:5173");
+
+    expect(res.headers["access-control-allow-origin"]).toBe("http://localhost:5173");
+  });
+});
+
 describe("Unauthorized admin access", () => {
   it("blocks listing donations without a token", async () => {
     const { default: app } = await import("../src/app.js");
@@ -132,6 +143,21 @@ describe("Unauthorized admin access", () => {
       .send({ status: "COMPLETED" });
 
     expect(res.status).toBe(401);
+    expect(prisma.donation.update).not.toHaveBeenCalled();
+  });
+
+  it("does not allow editors to update donation payment status", async () => {
+    const { default: app } = await import("../src/app.js");
+    const { signAuthToken } = await import("../src/middleware/auth.js");
+    const { prisma } = await import("../src/lib/prisma.js");
+    const token = signAuthToken({ sub: "editor-1", role: "EDITOR" });
+
+    const res = await request(app)
+      .patch("/api/donations/donation-1")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ status: "COMPLETED" });
+
+    expect(res.status).toBe(403);
     expect(prisma.donation.update).not.toHaveBeenCalled();
   });
 

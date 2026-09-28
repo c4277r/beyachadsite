@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Navbar.css';
 
 interface NavbarProps {
@@ -14,11 +14,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   isDonationPage = false,
   onNavigateToHome,
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+    setIsMenuOpen(false);
   };
 
   const handleContactClick = () => {
@@ -28,6 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const handleDonateClick = () => {
+    setIsMenuOpen(false);
     if (onNavigateToDonate) {
       onNavigateToDonate();
     }
@@ -35,9 +39,21 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <nav className="navbar" aria-label="ניווט ראשי">
-      <div className="navbar-menu">
+      <button
+        type="button"
+        className="navbar-toggle"
+        aria-label={isMenuOpen ? 'סגירת תפריט ניווט' : 'פתיחת תפריט ניווט'}
+        aria-expanded={isMenuOpen}
+        aria-controls="primary-navigation"
+        onClick={() => setIsMenuOpen((open) => !open)}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+      <div id="primary-navigation" className={`navbar-menu ${isMenuOpen ? 'is-open' : ''}`}>
         {isDonationPage ? (
-          <button className="nav-button" onClick={onNavigateToHome}>
+          <button className="nav-button" onClick={() => { setIsMenuOpen(false); onNavigateToHome?.(); }}>
             דף הבית
           </button>
         ) : (

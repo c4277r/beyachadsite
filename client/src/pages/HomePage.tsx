@@ -4,6 +4,7 @@ import { ContactForm } from './ContactForm';
 import logoImg from '../images/logo.png';
 import { DonateModal, type DonateModalType } from './DonateModel';
 import { FlipCard } from './FlipCard';
+import AccessibleDialog from '../components/AccessibleDialog';
 
 // יבוא התמונות לכרטיסי העשייה
 import educationalImg from '../images/Educational assistance.png';
@@ -38,24 +39,6 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
   const [isGalleryVisible, setIsGalleryVisible] = useState(false);
   const galleryRef = useRef<HTMLElement | null>(null);
 
-  // סגירת מודאל צור קשר בלחיצה על מקש ESC
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsContactOpen(false);
-        setIsPrivacyOpen(false);
-      }
-    };
-
-    if (isContactOpen || isPrivacyOpen) {
-      window.addEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isContactOpen, isPrivacyOpen]);
-
   // IntersectionObserver לטעינה ואנימציה של הגלריה
   useEffect(() => {
     const target = galleryRef.current;
@@ -79,18 +62,18 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
   }, []);
 
   const galleryImages = [
-    { id: 0, src: img0, alt: 'עמותה בפעילות' },
-    { id: 1, src: img1, alt: 'עמותה בפעילות' },
-    { id: 2, src: img2, alt: 'עמותה בפעילות' },
-    { id: 3, src: img3, alt: 'עמותה בפעילות' },
-    { id: 4, src: img4, alt: 'עמותה בפעילות' },
-    { id: 5, src: img5, alt: 'עמותה בפעילות' },
-    { id: 6, src: img6, alt: 'עמותה בפעילות' },
-    { id: 7, src: img7, alt: 'עמותה בפעילות' },
-    { id: 9, src: img9, alt: 'עמותה בפעילות' },
-    { id: 10, src: img10, alt: 'עמותה בפעילות' },
-    { id: 11, src: img11, alt: 'עמותה בפעילות' },
-    { id: 12, src: img12, alt: 'עמותה בפעילות' },
+    { id: 0, src: img0, alt: 'ילדים וצוות העמותה יושבים סביב שולחן בפעילות משותפת' },
+    { id: 1, src: img1, alt: 'שני ילדים בונים יחד מבנה מאריחים מגנטיים צבעוניים' },
+    { id: 2, src: img2, alt: 'משתתפים יושבים סביב שולחן ארוך בארוחה משותפת' },
+    { id: 3, src: img3, alt: 'ארוחה קבוצתית בחצר מקורה של העמותה' },
+    { id: 4, src: img4, alt: 'ילדים מתנסים ברכיבה על אופניים וקורקינטים' },
+    { id: 5, src: img5, alt: 'ילדים יושבים במעגל באירוע קבוצתי עם מדריך' },
+    { id: 6, src: img6, alt: 'ילדים בוחרים יחד מצרכים מהמקרר במטבח' },
+    { id: 7, src: img7, alt: 'ילדים משתתפים בפעילות קבוצתית בהנחיית מדריך' },
+    { id: 9, src: img9, alt: 'ילדים עובדים עם חוברות ודפים בחדר פעילות' },
+    { id: 10, src: img10, alt: 'ילדים מציירים וצובעים סביב שולחן יצירה' },
+    { id: 11, src: img11, alt: 'ילדים משחקים ומתנדנדים בחצר העמותה' },
+    { id: 12, src: img12, alt: 'ילדים וצוות העמותה סביב שולחן פעילות ואוכל' },
   ];
 
   const handleOpenContact = () => setIsContactOpen(true);
@@ -151,7 +134,7 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
         </div>
 
         <div className="home-logo-container">
-          <img src={logoImg} alt="Logo" className="home-logo" />
+          <img src={logoImg} alt="לוגו עמותת בית ביחד" className="home-logo" />
         </div>
 
         <div className="curved-text-container">
@@ -416,30 +399,21 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
 
       {/* Modal צור קשר */}
       {isContactOpen && (
-        <div className="modal-overlay" onClick={handleCloseContact}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <AccessibleDialog titleId="contact-dialog-title" onClose={handleCloseContact}>
             <button className="modal-close-btn" onClick={handleCloseContact} aria-label="סגור">
               &times;
             </button>
 
-            <h2 className="contact-title">לכל שאלה מוזמנים ליצור איתנו קשר</h2>
+            <h2 id="contact-dialog-title" className="contact-title">לכל שאלה מוזמנים ליצור איתנו קשר</h2>
             <p className="contact-subtitle">
               אנחנו כאן לכל פנייה, שרבוט או מחשבה.
             </p>
             <ContactForm idPrefix="modal" onSubmitSuccess={handleCloseContact} />
-          </div>
-        </div>
+        </AccessibleDialog>
       )}
 
       {isPrivacyOpen && (
-        <div className="modal-overlay" onClick={() => setIsPrivacyOpen(false)}>
-          <section
-            className="modal-content privacy-policy-content"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="privacy-policy-title"
-            onClick={(event) => event.stopPropagation()}
-          >
+        <AccessibleDialog titleId="privacy-policy-title" className="privacy-policy-content" onClose={() => setIsPrivacyOpen(false)}>
             <button
               type="button"
               className="modal-close-btn"
@@ -455,8 +429,7 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
               <p>פרטי הפניות והתרומות נשמרים במערכת העמותה ונגישים למשתמשי ניהול מורשים לצורך הטיפול בהם. אזור הניהול שומר אסימון התחברות זמני בכרטיסיית הדפדפן, והוא נמחק בעת יציאה או סגירת הכרטיסייה.</p>
               <p>לשאלות ולבקשות בנוגע למידע אישי, ניתן לפנות לעמותה דרך טופס יצירת הקשר באתר. תקופת שמירת המידע ודרך הטיפול בבקשות עיון, תיקון או מחיקה דורשות אישור והשלמה מצד העמותה לפני פרסום המדיניות כגרסה סופית.</p>
             </div>
-          </section>
-        </div>
+        </AccessibleDialog>
       )}
 
       {/* רכיב מודאל תרומות מופרד */}

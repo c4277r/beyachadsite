@@ -27,6 +27,7 @@ export const FlipCard: React.FC<FlipCardProps> = ({ title, text, imgSrc, imgAlt 
       tabIndex={0}
       role="button"
       aria-pressed={isFlipped}
+      aria-label={`${title}: ${isFlipped ? 'הצגת תמונה' : 'הצגת פרטים'}`}
       onClick={handleToggle}
       onKeyDown={handleKeyDown}
     >

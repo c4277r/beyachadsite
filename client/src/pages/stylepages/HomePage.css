@@ -883,6 +883,12 @@ html, body {
   color: #000;
 }
 
+.flip-card:focus-visible {
+  outline: 4px solid #8b4b18;
+  outline-offset: 5px;
+  border-radius: 15px;
+}
+
 /* =========================================
    12. התאמות רספונסיביות (Media Queries)
    ========================================= */

@@ -22,6 +22,29 @@
   z-index: 1000; /* דואג שסרגל הניווט יופיע מעל כל אלמנט בדף */
 }
 
+.navbar-toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid rgba(67, 18, 78, 0.25);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--logo-text-color);
+  cursor: pointer;
+}
+
+.navbar-toggle span {
+  display: block;
+  width: 21px;
+  height: 2px;
+  background: currentColor;
+}
+
 /* =========================================
    תפריט וכפתורי הניווט
    ========================================= */
@@ -68,4 +91,53 @@
   opacity: 0.65;
   cursor: default;
   transform: none;
+}
+
+.navbar :focus-visible {
+  outline: 3px solid #8b4b18;
+  outline-offset: 3px;
+}
+
+@media (max-width: 960px) {
+  .navbar {
+    min-height: 60px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+  }
+
+  .navbar-toggle {
+    display: inline-flex;
+  }
+
+  .navbar-menu {
+    display: none;
+    order: 3;
+    flex: 1 0 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    width: 100%;
+    padding-top: 8px;
+  }
+
+  .navbar-menu.is-open {
+    display: flex;
+  }
+
+  .navbar-menu .nav-button {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 14px;
+    text-align: start;
+  }
+
+  .navbar-donate {
+    margin-inline-start: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding-inline: 10px;
+  }
 }

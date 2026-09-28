@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import AccessibleDialog from '../components/AccessibleDialog';
 
 export type DonateModalType = 'bank' | 'horatKava' | 'phone' | null;
 
@@ -8,28 +9,10 @@ interface DonateModalProps {
 }
 
 export const DonateModal: React.FC<DonateModalProps> = ({ type, onClose }) => {
-  // סגירת המודאל בלחיצה על מקש ESC
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    if (type) {
-      window.addEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [type, onClose]);
-
   if (!type) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content donate-modal-box" onClick={(e) => e.stopPropagation()}>
+    <AccessibleDialog titleId="donate-dialog-title" className="donate-modal-box" onClose={onClose}>
         <button className="modal-close-btn" onClick={onClose} aria-label="סגור">
           &times;
         </button>
@@ -37,7 +20,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ type, onClose }) => {
         {type === 'bank' && (
           <>
             <div className="donate-modal-icon">🏦</div>
-            <h2 className="contact-title">פרטים להעברה בנקאית</h2>
+            <h2 id="donate-dialog-title" className="contact-title">פרטים להעברה בנקאית</h2>
             <div className="bank-details-box">
               <p><strong>שם החשבון:</strong> חרוצים במעש ע"ר</p>
               <p><strong>בנק:</strong> לאומי</p>
@@ -53,7 +36,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ type, onClose }) => {
         {type === 'horatKava' && (
           <>
             <div className="donate-modal-icon">📜</div>
-            <h2 className="contact-title">הוראת קבע בנקאית</h2>
+            <h2 id="donate-dialog-title" className="contact-title">הוראת קבע בנקאית</h2>
             <p className="contact-subtitle">
               להקמת הרשאה לחיוב חשבון ישירות בבנק שלכם:
             </p>
@@ -72,7 +55,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ type, onClose }) => {
         {type === 'phone' && (
           <>
             <div className="donate-modal-icon">📞</div>
-            <h2 className="contact-title">תרומה טלפונית</h2>
+            <h2 id="donate-dialog-title" className="contact-title">תרומה טלפונית</h2>
             <p className="contact-subtitle">
               ניתן לתרום במוקד הטלפוני המאובטח שלנו:
             </p>
@@ -82,7 +65,6 @@ export const DonateModal: React.FC<DonateModalProps> = ({ type, onClose }) => {
             <p className="donate-modal-note">זמינים עבורכם א'-ה' 09:00 - 18:00</p>
           </>
         )}
-      </div>
-    </div>
+    </AccessibleDialog>
   );
 };

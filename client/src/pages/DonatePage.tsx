@@ -26,6 +26,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ onNavigateToHome }) => {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [isAmountConfirmed, setIsAmountConfirmed] = useState<boolean>(false);
+  const [isDonationSubmitted, setIsDonationSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const predefinedAmounts = [180, 360, 720, 1250, 3600];
@@ -34,7 +35,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ onNavigateToHome }) => {
     register,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = useForm<IDonateDetailsInput>();
 
   const handleSelectAmount = (amount: number) => {
@@ -62,6 +63,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ onNavigateToHome }) => {
 
   const onSubmitPayment: SubmitHandler<IDonateDetailsInput> = async (data) => {
     setSubmitError(null);
+    setIsDonationSubmitted(false);
     try {
       await submitDonation({
         amount: finalAmount,
@@ -70,6 +72,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ onNavigateToHome }) => {
         donorEmail: data.donorEmail,
         donorPhone: data.donorPhone || undefined,
       });
+      setIsDonationSubmitted(true);
     } catch (error) {
       setSubmitError(
         error instanceof ApiRequestError ? error.message : 'שליחת התרומה נכשלה, אנא נסה שוב'
@@ -129,7 +132,7 @@ export const DonatePage: React.FC<DonatePageProps> = ({ onNavigateToHome }) => {
                 אישור סכום והמשך
               </button>
             </form>
-          ) : isSubmitSuccessful ? (
+          ) : isDonationSubmitted ? (
             <div className="success-message">
               תרומתך בסך ₪{finalAmount} נקלטה בהצלחה! ניצור עמך קשר בהקדם להשלמת התשלום. תודה על התמיכה.
             </div>

@@ -589,6 +589,33 @@ html, body {
   margin-bottom: 25px;
 }
 
+.site-footer {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background-color: var(--bg-pearl-dark);
+}
+
+.privacy-policy-link {
+  border: 0;
+  padding: 8px 12px;
+  background: transparent;
+  color: var(--logo-text-color);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+
+.privacy-policy-copy {
+  color: #333;
+  font: 16px/1.8 sans-serif;
+  text-align: right;
+}
+
+.privacy-policy-copy p + p {
+  margin-top: 16px;
+}
+
 .contact-form {
   display: flex;
   flex-direction: column;

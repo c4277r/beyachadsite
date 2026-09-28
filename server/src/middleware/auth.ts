@@ -29,6 +29,9 @@ function getJwtSecret(): string {
     // empty/guessable secret.
     throw new Error("JWT_SECRET is not configured");
   }
+  if (process.env.NODE_ENV === "production" && secret.length < 64) {
+    throw new Error("Production JWT_SECRET must contain at least 64 characters");
+  }
   return secret;
 }
 

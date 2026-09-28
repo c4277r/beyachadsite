@@ -6,7 +6,7 @@ import donationRoutes from "./routes/donationRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
-dotenv.config();
+dotenv.config({ path: process.env.NODE_ENV === "production" ? ".env.production" : ".env" });
 
 const app = express();
 
@@ -21,6 +21,26 @@ const configuredOrigins = process.env.ALLOWED_ORIGINS
   ?.split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+if (process.env.NODE_ENV === "production") {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret || jwtSecret.length < 64) {
+    throw new Error("Production requires a randomly generated JWT_SECRET of at least 64 characters");
+  }
+  if (!configuredOrigins?.length) {
+    throw new Error("Production requires ALLOWED_ORIGINS to explicitly list the official HTTPS site origin(s)");
+  }
+  for (const origin of configuredOrigins) {
+    let parsedOrigin: URL;
+    try {
+      parsedOrigin = new URL(origin);
+    } catch {
+      throw new Error(`Invalid production CORS origin: ${origin}`);
+    }
+    if (parsedOrigin.protocol !== "https:" || parsedOrigin.origin !== origin) {
+      throw new Error(`Production CORS origins must be exact HTTPS origins: ${origin}`);
+    }
+  }
+}
 const allowedOrigins =
   configuredOrigins?.length
     ? configuredOrigins

@@ -50,7 +50,7 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
     | ApiErrorResponse
     | null;
 
-  if (!response.ok || !payload || payload.success === false) {
+  if (!response.ok || payload?.success !== true) {
     throw new ApiRequestError(
       payload?.message ?? 'אירעה שגיאה, אנא נסה שוב',
       response.status,
@@ -127,7 +127,7 @@ async function adminRequest<T>(path: string, token: string, init: RequestInit = 
     | ApiSuccessResponse<T>
     | ApiErrorResponse
     | null;
-  if (!response.ok || !payload || payload.success === false) {
+  if (!response.ok || payload?.success !== true) {
     throw new ApiRequestError(
       payload?.message ?? 'אירעה שגיאה, אנא נסה שוב',
       response.status,

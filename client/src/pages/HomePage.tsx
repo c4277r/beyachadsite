@@ -12,18 +12,18 @@ import workshopsImg from '../images/Workshops.png';
 import Kits from '../images/Kits.png';
 
 // יבוא התמונות לגלריה
-import img0 from '../images/activity.png';
-import img1 from '../images/activity1.png';
-import img2 from '../images/activity2.png';
-import img3 from '../images/activity3.png';
-import img4 from '../images/activity4.png';
-import img5 from '../images/activity5.png';
-import img6 from '../images/activity6.png';
-import img7 from '../images/activity7.png';
-import img9 from '../images/activity9.png';
-import img10 from '../images/activity10.png';
-import img11 from '../images/activity11.png';
-import img12 from '../images/activity12.png';
+import img0 from '../images/activity.avif';
+import img1 from '../images/activity1.avif';
+import img2 from '../images/activity2.avif';
+import img3 from '../images/activity3.avif';
+import img4 from '../images/activity4.avif';
+import img5 from '../images/activity5.avif';
+import img6 from '../images/activity6.avif';
+import img7 from '../images/activity7.avif';
+import img9 from '../images/activity9.avif';
+import img10 from '../images/activity10.avif';
+import img11 from '../images/activity11.avif';
+import img12 from '../images/activity12.avif';
 
 import './stylepages/HomePage.css';
 
@@ -33,6 +33,7 @@ interface HomePageProps {
 
 export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [activeDonateModal, setActiveDonateModal] = useState<DonateModalType>(null);
   const [isGalleryVisible, setIsGalleryVisible] = useState(false);
   const galleryRef = useRef<HTMLElement | null>(null);
@@ -42,17 +43,18 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsContactOpen(false);
+        setIsPrivacyOpen(false);
       }
     };
 
-    if (isContactOpen) {
+    if (isContactOpen || isPrivacyOpen) {
       window.addEventListener('keydown', handleKeyDown);
     }
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isContactOpen]);
+  }, [isContactOpen, isPrivacyOpen]);
 
   // IntersectionObserver לטעינה ואנימציה של הגלריה
   useEffect(() => {
@@ -234,10 +236,10 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
               className="gallery-item"
               style={{ '--i': index } as React.CSSProperties}
             >
-              <img 
-                src={image.src} 
-                alt={image.alt} 
-                className="gallery-image" 
+              <img
+                src={image.src}
+                alt={image.alt}
+                className="gallery-image"
                 loading="lazy"
                 decoding="async"
               />
@@ -406,6 +408,12 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
         </div>
       </section>
 
+      <footer className="site-footer">
+        <button type="button" className="privacy-policy-link" onClick={() => setIsPrivacyOpen(true)}>
+          מדיניות פרטיות
+        </button>
+      </footer>
+
       {/* Modal צור קשר */}
       {isContactOpen && (
         <div className="modal-overlay" onClick={handleCloseContact}>
@@ -420,6 +428,34 @@ export const Home: React.FC<HomePageProps> = ({ onNavigateToDonate }) => {
             </p>
             <ContactForm idPrefix="modal" onSubmitSuccess={handleCloseContact} />
           </div>
+        </div>
+      )}
+
+      {isPrivacyOpen && (
+        <div className="modal-overlay" onClick={() => setIsPrivacyOpen(false)}>
+          <section
+            className="modal-content privacy-policy-content"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="privacy-policy-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close-btn"
+              onClick={() => setIsPrivacyOpen(false)}
+              aria-label="סגירת מדיניות הפרטיות"
+            >
+              &times;
+            </button>
+            <h2 id="privacy-policy-title" className="contact-title">מדיניות פרטיות</h2>
+            <div className="privacy-policy-copy">
+              <p>בעת שליחת טופס יצירת קשר, האתר אוסף שם פרטי ומשפחה, כתובת דוא״ל, מספר טלפון ותוכן ההודעה כדי להשיב לפנייה ולנהל את הטיפול בה.</p>
+              <p>בעת שליחת פרטי תרומה, האתר שומר את שם התורם, כתובת הדוא״ל, מספר הטלפון אם נמסר, הסכום ואופן התרומה לצורך תיעוד ופנייה בנוגע לתרומה. בשלב זה האתר אינו גובה תשלום ואינו מבקש או שומר פרטי כרטיס אשראי.</p>
+              <p>פרטי הפניות והתרומות נשמרים במערכת העמותה ונגישים למשתמשי ניהול מורשים לצורך הטיפול בהם. אזור הניהול שומר אסימון התחברות זמני בכרטיסיית הדפדפן, והוא נמחק בעת יציאה או סגירת הכרטיסייה.</p>
+              <p>לשאלות ולבקשות בנוגע למידע אישי, ניתן לפנות לעמותה דרך טופס יצירת הקשר באתר. תקופת שמירת המידע ודרך הטיפול בבקשות עיון, תיקון או מחיקה דורשות אישור והשלמה מצד העמותה לפני פרסום המדיניות כגרסה סופית.</p>
+            </div>
+          </section>
         </div>
       )}
 

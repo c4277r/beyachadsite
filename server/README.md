@@ -11,6 +11,8 @@ Express and Prisma API for the בית ביחד website. Prisma uses MongoDB.
 
 Set `CLIENT_URL` to the client origin. `ALLOWED_ORIGINS` can contain a comma-separated list; leave it empty to use `CLIENT_URL` plus the local Vite origin.
 
+For production, copy `.env.production.example` to `.env.production` and set real values, or inject the same variables through the deployment platform. The server loads `.env.production` when `NODE_ENV=production`; platform-provided variables take precedence. Production startup requires a JWT secret of at least 64 characters and an explicit list of exact HTTPS origins. `.env.production` is ignored by Git; never commit it.
+
 ## Admin account
 
 Set `ADMIN_NAME`, `ADMIN_EMAIL`, and a unique `ADMIN_PASSWORD` in the server `.env`, then run `npm run admin:create`. This creates one ADMIN account and refuses to overwrite an existing account. Replace the sample values before running it. There is no public registration endpoint.

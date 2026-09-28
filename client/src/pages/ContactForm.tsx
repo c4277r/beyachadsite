@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { submitContactMessage, ApiRequestError } from '../lib/api';
 
@@ -21,17 +21,22 @@ export const ContactForm: React.FC<ContactFormProps> = ({
   onSubmitSuccess,
   idPrefix = 'form',
 }) => {
+  const [isSubmissionSuccessful, setIsSubmissionSuccessful] = useState(false);
   const {
     register,
     handleSubmit,
     reset,
+    clearErrors,
     setError,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = useForm<IContactInput>();
 
   const onSubmit: SubmitHandler<IContactInput> = async (data) => {
+    setIsSubmissionSuccessful(false);
+    clearErrors('root');
     try {
       await submitContactMessage(data);
+      setIsSubmissionSuccessful(true);
       reset();
       onSubmitSuccess?.();
     } catch (error) {
@@ -43,7 +48,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="contact-form" noValidate>
-      {isSubmitSuccessful && (
+      {isSubmissionSuccessful && (
         <div className="success-message">
           הודעתך נשלחה בהצלחה! נחזור אליך בהקדם.
         </div>

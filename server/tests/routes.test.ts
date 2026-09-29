@@ -13,9 +13,14 @@ vi.mock("../src/lib/prisma.js", () => ({
         createdAt: new Date(),
       })),
       findMany: vi.fn(async () => []),
+      count: vi.fn(async () => 0),
       findUnique: vi.fn(async () => null),
       update: vi.fn(),
+      updateMany: vi.fn(async () => ({ count: 0 })),
     },
+    $runCommandRaw: vi.fn(async (command: Record<string, unknown>) =>
+      command.ping ? { ok: 1 } : { cursor: { firstBatch: [] } }
+    ),
     contactMessage: {
       create: vi.fn(async ({ data }: { data: Record<string, unknown> }) => ({
         id: "message-1",
@@ -24,6 +29,7 @@ vi.mock("../src/lib/prisma.js", () => ({
         updatedAt: new Date(),
       })),
       findMany: vi.fn(async () => []),
+      count: vi.fn(async () => 0),
       findUnique: vi.fn(async () => null),
       update: vi.fn(),
       delete: vi.fn(),
@@ -32,6 +38,11 @@ vi.mock("../src/lib/prisma.js", () => ({
       findUnique: vi.fn(async () => null),
     },
   },
+}));
+
+vi.mock("../src/services/emailService.js", () => ({
+  sendContactNotification: vi.fn(async () => {}),
+  sendDonationConfirmation: vi.fn(async () => {}),
 }));
 
 beforeAll(() => {
@@ -99,6 +110,7 @@ describe("Public contact submissions", () => {
 
   it("accepts a valid contact submission", async () => {
     const { default: app } = await import("../src/app.js");
+    const { sendContactNotification } = await import("../src/services/emailService.js");
 
     const res = await request(app).post("/api/contact").send({
       firstName: "דוד",
@@ -109,6 +121,9 @@ describe("Public contact submissions", () => {
     });
 
     expect(res.status).toBe(201);
+    expect(sendContactNotification).toHaveBeenCalledWith(
+      expect.objectContaining({ email: "david@example.com", status: "UNREAD" })
+    );
   });
 });
 
@@ -118,6 +133,33 @@ describe("CORS configuration", () => {
     const res = await request(app).get("/health").set("Origin", "http://localhost:5173");
 
     expect(res.headers["access-control-allow-origin"]).toBe("http://localhost:5173");
+  });
+});
+
+describe("Database health check", () => {
+  it("returns ready only after MongoDB responds to ping", async () => {
+    const { default: app } = await import("../src/app.js");
+    const { prisma } = await import("../src/lib/prisma.js");
+    (prisma.$runCommandRaw as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: 1 });
+
+    const res = await request(app).get("/health");
+
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+    expect(prisma.$runCommandRaw).toHaveBeenLastCalledWith({ ping: 1 });
+  });
+
+  it("returns 503 when MongoDB cannot be reached", async () => {
+    const { default: app } = await import("../src/app.js");
+    const { prisma } = await import("../src/lib/prisma.js");
+    (prisma.$runCommandRaw as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error("database connection failed")
+    );
+
+    const res = await request(app).get("/health");
+
+    expect(res.status).toBe(503);
+    expect(res.body).toEqual({ ok: false, message: "Database unavailable" });
   });
 });
 
@@ -179,5 +221,114 @@ describe("Unauthorized admin access", () => {
       .get("/api/donations")
       .set("Authorization", "Bearer not-a-real-token");
     expect(res.status).toBe(401);
+  });
+});
+
+describe("Admin pagination and donation statistics", () => {
+  it("limits donation results to 20 and returns page metadata", async () => {
+    const { default: app } = await import("../src/app.js");
+    const { signAuthToken } = await import("../src/middleware/auth.js");
+    const { prisma } = await import("../src/lib/prisma.js");
+    const token = signAuthToken({ sub: "admin-1", role: "ADMIN" });
+
+    const res = await request(app)
+      .get("/api/donations?page=2")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(prisma.donation.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 20, take: 20 })
+    );
+    expect(res.body.pagination).toEqual({ page: 2, pageSize: 20, total: 0, totalPages: 0 });
+  });
+
+  it("limits contact messages to 20 and returns page metadata", async () => {
+    const { default: app } = await import("../src/app.js");
+    const { signAuthToken } = await import("../src/middleware/auth.js");
+    const { prisma } = await import("../src/lib/prisma.js");
+    const token = signAuthToken({ sub: "admin-1", role: "ADMIN" });
+
+    const res = await request(app)
+      .get("/api/contact?page=3")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(prisma.contactMessage.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 40, take: 20 })
+    );
+    expect(res.body.pagination).toEqual({ page: 3, pageSize: 20, total: 0, totalPages: 0 });
+  });
+
+  it("uses database aggregation for donation statistics", async () => {
+    const { default: app } = await import("../src/app.js");
+    const { signAuthToken } = await import("../src/middleware/auth.js");
+    const { prisma } = await import("../src/lib/prisma.js");
+    const token = signAuthToken({ sub: "admin-1", role: "ADMIN" });
+    (prisma.$runCommandRaw as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      cursor: {
+        firstBatch: [
+          {
+            totals: [{
+              totalDonations: 3,
+              completedDonations: 2,
+              pendingDonations: 1,
+              totalAmount: 36000,
+              averageDonation: 18000,
+            }],
+            paymentTypes: [{ _id: "CREDIT_CARD", totalAmount: 36000 }],
+          },
+        ],
+      },
+    });
+
+    const res = await request(app)
+      .get("/api/donations/stats/overview")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual({
+      totalDonations: 3,
+      completedDonations: 2,
+      pendingDonations: 1,
+      totalAmount: 360,
+      averageDonation: 180,
+      paymentTypeBreakdown: { CREDIT_CARD: 360 },
+    });
+    expect(prisma.$runCommandRaw).toHaveBeenCalledWith(
+      expect.objectContaining({ aggregate: "donations" })
+    );
+  });
+});
+
+describe("Email notifications", () => {
+  it("emails the donor when a donation first becomes completed", async () => {
+    const { default: app } = await import("../src/app.js");
+    const { signAuthToken } = await import("../src/middleware/auth.js");
+    const { prisma } = await import("../src/lib/prisma.js");
+    const { sendDonationConfirmation } = await import("../src/services/emailService.js");
+    const token = signAuthToken({ sub: "admin-1", role: "ADMIN" });
+    (prisma.donation.updateMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ count: 1 });
+    (prisma.donation.findUnique as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      id: "donation-1",
+      amount: 18000,
+      donorName: "Test Donor",
+      donorEmail: "donor@example.com",
+      receiptUrl: "https://example.com/receipt.pdf",
+      status: "COMPLETED",
+    });
+
+    const res = await request(app)
+      .patch("/api/donations/donation-1")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ status: "COMPLETED" });
+
+    expect(res.status).toBe(200);
+    expect(sendDonationConfirmation).toHaveBeenCalledWith({
+      id: "donation-1",
+      amount: 18000,
+      donorName: "Test Donor",
+      donorEmail: "donor@example.com",
+      receiptUrl: "https://example.com/receipt.pdf",
+    });
   });
 });

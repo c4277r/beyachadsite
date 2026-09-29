@@ -1,0 +1,36 @@
+name: Daily MongoDB Backup
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install MongoDB Database Tools
+        run: |
+          curl -fsSL https://pgp.mongodb.com/server-8.0.asc | sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-8.0.gpg
+          echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+          sudo apt-get update
+          sudo apt-get install -y mongodb-database-tools
+
+      - name: Create compressed database archive
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        run: |
+          test -n "$MONGODB_URI" || { echo "MONGODB_URI Actions secret is required" >&2; exit 1; }
+          mkdir -p backup
+          mongodump --uri="$MONGODB_URI" --archive="backup/mongodb-$(date -u +%F).archive.gz" --gzip
+
+      - name: Store backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mongodb-backup-${{ github.run_id }}
+          path: backup/*.archive.gz
+          if-no-files-found: error
+          retention-days: 90

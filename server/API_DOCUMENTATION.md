@@ -35,12 +35,13 @@ Public and rate-limited. Body:
 ```
 
 Valid submissions are saved as `UNREAD` and return HTTP 201.
+The team receives an email notification at `SITE_TEAM_EMAIL` (default: `beitbeyachad@gmail.com`) when the message is saved. Configure `RESEND_API_KEY` and a Resend-verified `EMAIL_FROM` sender; delivery failures are logged without failing the submission.
 
 ### Protected staff endpoints
 
 All require a valid JWT and ADMIN or EDITOR role:
 
-- `GET /contact` - list messages; optional `?status=UNREAD|READ|HANDLED|ARCHIVED`.
+- `GET /contact` - list messages in pages of 20; optional `?page=2` and `?status=UNREAD|READ|HANDLED|ARCHIVED`. Responses include `pagination` metadata.
 - `GET /contact/:id` - retrieve one message.
 - `PATCH /contact/:id` - set `status` and optionally internal `notes`.
 - `DELETE /contact/:id` - permanently delete a message.
@@ -65,12 +66,13 @@ Public and rate-limited. Creates a `PENDING` record only; it does not charge a c
 
 ### Protected staff endpoints
 
-- `GET /donations` - ADMIN or EDITOR; optionally filter by `?status=` and `?paymentType=`.
+- `GET /donations` - ADMIN or EDITOR; returns pages of 20 and accepts `?page=2`, `?status=`, and `?paymentType=`. Responses include `pagination` metadata; totals are computed in MongoDB.
 - `GET /donations/stats/overview` - ADMIN or EDITOR.
 - `GET /donations/:id` - ADMIN or EDITOR.
 - `PATCH /donations/:id` - ADMIN only; validates status, optional transaction ID and receipt URL.
 
 The status update endpoint is an interim admin operation, not a payment webhook. Verify real payments with the provider before changing a donation to `COMPLETED`. Provider initiation and callback verification are not implemented yet.
+When a donation first changes from `PENDING` to `COMPLETED`, the API emails its donor a confirmation (not a tax receipt). The message includes a receipt link only if `receiptUrl` was provided. Email requires `RESEND_API_KEY` and a verified `EMAIL_FROM` sender.
 
 ## Health
 

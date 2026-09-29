@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
 import { CreateContactMessageInput } from "../utils/validation.js";
 import { ApiError, asyncHandler } from "../middleware/errorHandler.js";
+import { ADMIN_PAGE_SIZE, parsePage } from "../utils/pagination.js";
+import { sendContactNotification } from "../services/emailService.js";
 
 // =====================================================
 // Create Contact Message
@@ -19,6 +21,7 @@ export const createContactMessage = asyncHandler(async (req: Request, res: Respo
       status: "UNREAD",
     },
   });
+  await sendContactNotification(message);
 
   res.status(201).json({
     success: true,
@@ -38,20 +41,33 @@ function isContactStatus(value: unknown): value is ContactStatus {
 }
 
 export const getAllContactMessages = asyncHandler(async (req: Request, res: Response) => {
-  const { status } = req.query;
+  const { status, page: pageQuery } = req.query;
+  const page = parsePage(pageQuery);
 
   if (status !== undefined && !isContactStatus(status)) {
     throw new ApiError(400, "סטטוס לא תקין");
   }
 
-  const messages = await prisma.contactMessage.findMany({
-    where: status ? { status } : {},
-    orderBy: { createdAt: "desc" },
-  });
+  const where = status ? { status } : {};
+  const [messages, count] = await Promise.all([
+    prisma.contactMessage.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * ADMIN_PAGE_SIZE,
+      take: ADMIN_PAGE_SIZE,
+    }),
+    prisma.contactMessage.count({ where }),
+  ]);
 
   res.json({
     success: true,
-    count: messages.length,
+    count,
+    pagination: {
+      page,
+      pageSize: ADMIN_PAGE_SIZE,
+      total: count,
+      totalPages: Math.ceil(count / ADMIN_PAGE_SIZE),
+    },
     data: messages,
   });
 });

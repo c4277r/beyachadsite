@@ -5,6 +5,7 @@ import contactRoutes from "./routes/contactRoutes.js";
 import donationRoutes from "./routes/donationRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { prisma } from "./lib/prisma.js";
 
 dotenv.config({ path: process.env.NODE_ENV === "production" ? ".env.production" : ".env" });
 
@@ -62,8 +63,17 @@ app.use(
 app.use(express.json({ limit: "20kb" }));
 
 // Health Check
-app.get("/health", (_req, res) => {
-  res.json({ ok: true, message: "Server is running" });
+app.get("/health", async (_req, res) => {
+  try {
+    const result = await prisma.$runCommandRaw({ ping: 1 }) as { ok?: number };
+    if (result.ok !== 1) {
+      return res.status(503).json({ ok: false, message: "Database unavailable" });
+    }
+
+    return res.json({ ok: true, message: "Server and database are ready" });
+  } catch {
+    return res.status(503).json({ ok: false, message: "Database unavailable" });
+  }
 });
 
 // =====================================================
